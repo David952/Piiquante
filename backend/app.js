@@ -1,15 +1,16 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const bodyParser = require("body-parser");
 const path = require('path');
 
-//On utilise "dotenv" pour masquer les informations de la base de données
+// On utilise "dotenv" pour masquer les informations de la base de données
 require("dotenv").config();
 
-//On déclare les routes
-const sauceRoutes = require('/routes/sauce');
+// On déclare les routes
+const sauceRoutes = require('./routes/sauce');
 const userRoutes = require('./routes/user');
 
-//Connexion à la base de données
+// Connexion à la base de données
 mongoose.connect(process.env.DB_URL,
   { useNewUrlParser: true,
     useUnifiedTopology: true })
@@ -17,10 +18,10 @@ mongoose.connect(process.env.DB_URL,
   .catch(() => console.log('Connexion à MongoDB échouée !'));
 
 
-//On définit "app" qui utilise express
+// On définit "app" qui utilise express
 const app = express();
 
-//Middleware de sécurité qui bloque les appels HTTP entre des serveurs différents ce qui empêche des requêtes malveillantes qui est nommé CORS « Cross Origin Resource Sharing »
+// Middleware de sécurité qui bloque les appels HTTP entre des serveurs différents ce qui empêche des requêtes malveillantes qui est nommé CORS « Cross Origin Resource Sharing »
 app.use((req, res, next) => {
   //On peut accéder à l'API depuis n'importe quelle origine
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -28,11 +29,32 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
   //On envoi des requêtes avec les méthodes mentionnées
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  
   next();
 });
 
+app.use('/api/sauces', (req, res, next) => {
+  const sauce = [
+    {
+      _id: 'exemple1',
+      name: 'SAUCE MORUGA TRINIDAD SCORPION (local)',
+      manufacturer: "Cajohn's",
+      description: 'La sauce piquante avec le piment moruga scorpion, le plus fort du monde depuis 2012. Une sauce à découvrir.',
+      mainPepper: 'Piment trinidad moruga scorpion',
+      imageUrl: 'https://www.sauce-piquante.fr/162-large_default/sauce-piquante-moruga-trinidad-scorpion.jpg',
+      heat: 9,
+      likes: 0,
+      dislikes: 0,
+      userId: 'userExemple1',
+    },
+  ];
+  res.status(200).json(sauce);
+});
 
-//On appelle la variable où est stocké la route
+// Transforme les données de la requête POST en un objet JSON
+app.use(bodyParser.json());
+
+// On appelle la variable où est stocké la route
 app.use('/api/sauces', sauceRoutes);
 app.use('/api/auth', userRoutes);
 app.use('/images', express.static(path.join(__dirname, 'images')));
