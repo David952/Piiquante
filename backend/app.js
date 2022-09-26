@@ -33,24 +33,6 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/api/sauces', (req, res, next) => {
-  const sauce = [
-    {
-      _id: 'exemple1',
-      name: 'SAUCE MORUGA TRINIDAD SCORPION (local)',
-      manufacturer: "Cajohn's",
-      description: 'La sauce piquante avec le piment moruga scorpion, le plus fort du monde depuis 2012. Une sauce à découvrir.',
-      mainPepper: 'Piment trinidad moruga scorpion',
-      imageUrl: 'https://www.sauce-piquante.fr/162-large_default/sauce-piquante-moruga-trinidad-scorpion.jpg',
-      heat: 9,
-      likes: 0,
-      dislikes: 0,
-      userId: 'userExemple1',
-    },
-  ];
-  res.status(200).json(sauce);
-});
-
 // Transforme les données de la requête POST en un objet JSON
 app.use(bodyParser.json());
 

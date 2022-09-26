@@ -17,7 +17,7 @@ exports.createSauce = (req, res, next) => {
 }
 
 // On récupère toutes les sauces
-exports.getAllSauce = (req, res, next) => {
+exports.getAllSauces = (req, res, next) => {
     sauceModels.find()
         .then(sauces => res.status(200).json(sauces))
         .catch(error => res.status(400).json({
@@ -72,4 +72,31 @@ exports.deleteSauce = (req, res, next) => {
         res.status(500).json({})
     })
         
+}
+
+//J'aime ou je n'aime pas une sauce
+exports.likesAndDislikes = (req, res, next) => {
+    if(req.body.likes === 1) {
+        sauceModels.updateOne({ _id: req.params.id}, {likes: req.body.likes = 1}, {usersLiked:req.auth.userId})
+        .then(() => res.status(200).json({ message: "J'aime cette sauce !"}))
+        .catch(error => res.status(401).json({ error }));
+    }
+
+    if(req.body.likes === 0) {
+        sauceModels.updateOne({ _id: req.params.id}, {likes: req.body.likes = - 1}, {usersLiked:req.auth.userId})
+        .then(() => res.status(200).json({ message: "J'aime a été annulé !"}))
+        .catch(error => res.status(401).json({ error }));
+    }
+
+    if(req.body.dislikes === 1) {
+        sauceModels.updateOne({ _id: req.params.id}, {dislikes: req.body.dislikes = 1}, {usersDisliked:req.auth.userId})
+        .then(() => res.status(200).json({ message: "Je n'aime pas cette sauce !"}))
+        .catch(error => res.status(401).json({ error }));
+    }
+
+    if(req.body.dislikes === 0){
+        sauceModels.updateOne({ _id: req.params.id}, {dislikes: req.body.dislikes = + 1}, {usersDisliked:req.auth.userId})
+        .then(() => res.status(200).json({ message: "Je n'aime pas a été annulé !"}))
+        .catch(error => res.status(401).json({ error }));
+    }
 }
