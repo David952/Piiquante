@@ -95,7 +95,7 @@ exports.likesAndDislikes = (req, res, next) => {
     }
 
     if(req.body.dislikes === 0){
-        sauceModels.updateOne({ _id: req.params.id}, {dislikes: req.body.dislikes = + 1}, {usersDisliked:req.auth.userId})
+        sauceModels.updateOne({ _id: req.params.id}, {dislikes: req.body.dislikes = - 1}, {usersDisliked:req.auth.userId})
         .then(() => res.status(200).json({ message: "Je n'aime pas a été annulé !"}))
         .catch(error => res.status(401).json({ error }));
     }
