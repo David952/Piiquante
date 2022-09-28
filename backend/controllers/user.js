@@ -2,7 +2,12 @@ const User = require('../models/user');
 const bcrypt = require('bcrypt');
 const jwToken = require('jsonwebtoken');
 
-exports.signup = (req, res, next) => {
+/**
+ * Middleware de création d'un compte utilisateur
+ * @param req - On récupère l'adresse email et le mot de passe crypté
+ * @param res - Renvoi un message si le compte utilisateur a bien été crée ou non
+ */
+exports.signup = (req, res) => {
     bcrypt.hash(req.body.password, 10)
     .then(hash => {
         const user = new User({
@@ -16,7 +21,12 @@ exports.signup = (req, res, next) => {
     .catch(error => res.status(500).json({ error }));
 };
 
-exports.login = (req, res, next) => {
+/**
+ * Middleware de connexion d'un compte utilisateur
+ * @param req - On récupère l'adresse email puis on compare si le mot de passe indiqué correspond à celui dans la base de données
+ * @param res - Renvoi un message si la connexion a échoué
+ */
+exports.login = (req, res) => {
     User.findOne({email: req.body.email})
     .then(user => {
         if (user === null) {
