@@ -1,5 +1,6 @@
 const sauceModels = require('../models/sauce');
 const fs = require('fs');
+const { json } = require('body-parser');
 
 /**
  * Middleware de création d'une sauce
@@ -24,7 +25,7 @@ exports.createSauce = (req, res) => {
 
 /**
  * Middleware de récupération de toutes les sauces
- * @param res - On renvoi un message si on bien toutes les sauces ou non
+ * @param res - On renvoi un message si on a bien toutes les sauces ou non
  */
 exports.getAllSauces = (req, res) => {
     sauceModels.find()
@@ -35,7 +36,7 @@ exports.getAllSauces = (req, res) => {
 /**
  * Middleware de récupération d'une seule sauce
  * @param req - On récupère l'id d'une sauce
- * @param res - On renvoi un message si on bien une sauce ou non
+ * @param res - On renvoi un message si on a une sauce ou non
  */
 exports.getOneSauce = (req, res) => {
     sauceModels.findOne({
@@ -51,15 +52,27 @@ exports.getOneSauce = (req, res) => {
  * @param res - On renvoi un message si on a modifié une sauce ou non
  */
 exports.modifySauce = (req, res) => {
-    sauceModels.updateOne({
-            _id: req.params.id
-        }, {
-            // L'opérateur spread "..." permet de faire une copie de tous les éléments de 'req.body'
-            ...req.body,
-            _id: req.params.id
-        })
-        .then(() => res.status(200).json({ message: 'Sauce modifié !'}))
-        .catch(error => res.status(400).json({ error }));
+    sauceModels.findOne({ _id: req.params.id })
+        .then(sauce => {
+            if(sauce.userId !== req.auth.userId) return res.status(401).json({ message: 'Opération non-autorisée'});
+
+            const sauceObject = req.file ? {
+                ...JSON.parse(req.body.sauce), 
+                imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+            } : { ...req.body };
+
+            delete sauceObject.userId;
+
+            sauceModels.updateOne({
+                _id: req.params.id
+            }, {
+                // L'opérateur spread "..." permet de faire une copie de tous les éléments de 'req.body'
+                ...sauceObject,
+                _id: req.params.id
+            })
+            .then(() => res.status(200).json({ message: 'Sauce modifié !'}))
+            .catch(error => res.status(400).json({ error }));
+        });
 }
 
 /**
@@ -68,7 +81,7 @@ exports.modifySauce = (req, res) => {
  * @param res - On renvoi un message si une sauce a été supprimé ou non
  */
 exports.deleteSauce = (req, res) => {
-    sauceModels.findOne({ _id: req.params.id})
+    sauceModels.findOne({ _id: req.params.id })
     .then(sauce => {
         if (sauce.userId != req.auth.userId) {
             res.status(401).json({ message : 'Non-autorisé'});
@@ -96,7 +109,7 @@ exports.likesAndDislikes = (req, res) => {
             switch(req.body.like) {
                 // Vérification que l'utilisateur n'a pas déjà liké la sauce (n'existe pas dans le tableau des utilisateurs)
                 case 1:
-                    if (!sauce.usersLiked.includes(req.body.userId) && req.body.like === 1) {
+                    if (!sauce.usersLiked.includes(req.body.userId)) {
                         sauceModels.updateOne(
                             { _id: req.params.id },
                             {
@@ -110,7 +123,7 @@ exports.likesAndDislikes = (req, res) => {
                     break;
                 // Vérification que l'utilisateur n'a pas déjà disliké la sauce (n'existe pas dans le tableau des utilisateurs)
                 case -1:
-                    if (!sauce.usersDisliked.includes(req.body.userId) && req.body.like === -1) {
+                    if (!sauce.usersDisliked.includes(req.body.userId)) {
                         sauceModels.updateOne(
                             { _id: req.params.id },
                             {
