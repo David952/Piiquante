@@ -13,13 +13,21 @@ const sauceSchema = mongoose.Schema({
   imageUrl: { type: String, required: true },
   // Note décrivant la sauce
   heat: { type: Number, required: true },
-  likes: { type: Number },
-  dislikes: { type: Number },
+  likes: { type: Number, default: 0 },
+  dislikes: { type: Number, default: 0 },
   // Tableau des identifiants des utilisateurs qui ont aimé la sauce
-  usersLiked: { type: [String] },
+  usersLiked: { type: [String], default: [] },
   // Tableau des identifiants des utilisateurs qui n'ont pas aimé la sauce
-  usersDisliked: { type: [String] },
+  usersDisliked: { type: [String], default: [] },
 });
+
+sauceSchema.methods.joiValidate = function(obj) {
+	var Joi = require('joi');
+	var schema = {
+		heat: Joi.types.Number().min(1).max(10),
+	}
+	return Joi.validate(obj, schema);
+}
 
 // On exporte ce schéma en modèle utilisable
 module.exports = mongoose.model('Sauce', sauceSchema);
