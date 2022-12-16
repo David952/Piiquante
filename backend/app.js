@@ -28,7 +28,7 @@ const app = express();
  * @param next - permet de terminer la fonction pour passer à la suivante
  */
 app.use((req, res, next) => {
-  //On peut accéder à l'API depuis n'importe quelle origine
+  //On peut accéder à l'API depuis n'importe quelle origine mais on peut contrôler qui a accès aux données
   res.setHeader('Access-Control-Allow-Origin', '*');
   //On ajoute les headers mentionnés aux requêtes envoyées vers notre API
   res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
@@ -37,7 +37,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Transforme les données de la requête POST en un objet JSON
+// Transforme les données d'une requête POST en un objet JSON
 app.use(bodyParser.json());
 
 // On définit le chemin puis on appelle la variable où est stocké la route
