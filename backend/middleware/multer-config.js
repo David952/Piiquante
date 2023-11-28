@@ -1,4 +1,6 @@
 const multer = require('multer');
+const path = require('path');
+const { validateFilename } = require('../middleware/sauceValidation');
 
 // On définit les extensions des images
 const MIME_TYPES = {
@@ -17,11 +19,16 @@ const storage = multer.diskStorage({
         callback(null, 'images');
     },
     filename: (req, file, callback) => {
-        const name = file.originalname.split(' ').join('_');
-        const extension = MIME_TYPES[file.mimetype];
-        callback(null, name + Date.now() + '.' + extension);
+        // Utiliser une fonction de validation avant de créer le nom du fichier
+        if (validateFilename(file.originalname)) {
+            const nameWithoutExtension = path.parse(file.originalname).name;
+            const name = nameWithoutExtension.split(' ').join('_');
+            const extension = MIME_TYPES[file.mimetype];
+            callback(null, name + '_' + Date.now() + '.' + extension);
+        } else {
+            callback(new Error('Nom de fichier non valide'), null);
+        }
     }
 });
 
-// On exporte multer en indiquant qu'il s'agit de fichier image uniquement
-module.exports = multer({storage: storage}).single('image');
+module.exports = multer({ storage }).single('image');
