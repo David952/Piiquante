@@ -17,11 +17,11 @@ module.exports = (req, res, next) => {
     req.auth = { userId: userId };
     // On vérifie que l'utilisiteur est le même que celui qui fait la requête
     if (req.body.userId && req.body.userId !== userId) {
-      throw "User ID invalide";
+      throw new Error("User ID invalide");
     } else {
       next();
     }
   } catch (error) {
-    res.status(401).json({ error });
+    res.status(401).json({ error: error.message || "Authentification échouée" });
   }
 };
