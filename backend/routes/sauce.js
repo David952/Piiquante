@@ -3,8 +3,11 @@ const router = express.Router();
 
 const auth = require('../middleware/auth');
 const multer = require('../middleware/multer-config');
+const limiter = require('../middleware/rateLimiter');
 
 const sauceCtrl = require('../controllers/sauce');
+
+router.use(limiter);
 
 // On définit le chemin, on ajoute nos middlewares puis on appelle le fichier 'sauce' avec ses fonctions dans le dossier 'controllers'
 router.post('/', auth, multer, sauceCtrl.createSauce);
