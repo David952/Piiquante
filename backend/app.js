@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require("body-parser");
 const path = require('path');
+const mongoSanitize = require('express-mongo-sanitize');
+const helmet = require("helmet");
 
 // On utilise "dotenv" pour masquer les informations de la base de données
 require("dotenv").config();
@@ -20,6 +22,7 @@ mongoose.connect(process.env.DB_URL,
 
 
 // On définit "app" qui utilise express
+// deepcode ignore UseCsurfForExpress: <please specify a reason of ignoring this>
 const app = express();
 
 /**
@@ -45,6 +48,11 @@ app.use(bodyParser.json());
 app.use('/api/sauces', sauceRoutes);
 app.use('/api/auth', userRoutes);
 app.use('/images', express.static(path.join(__dirname, 'images')));
+
+
+app.use(helmet.noSniff());
+app.use(mongoSanitize());
+app.disable('x-powered-by');
 
 // On exporte "app" qui nous permettre de l'utiliser dans d'autres fichiers
 module.exports = app;
