@@ -1,7 +1,10 @@
-const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const jwToken = require("jsonwebtoken");
 const validator = require("validator");
+
+const User = require("../models/user");
+
+const { validateEmail, validatePassword } = require('../middleware/userValidation');
 
 /**
  * Middleware de création d'un compte utilisateur
@@ -42,15 +45,25 @@ exports.signup = (req, res) => {
  * @param res - Renvoi un message si la connexion a échoué avec un statut "Unauthorized" sinon il passe en "OK"
  */
 exports.login = (req, res) => {
-  User.findOne({ email: req.body.email })
+  const { email, password } = req.body;
+
+  // Valider l'e-mail
+  if (!validateEmail(email)) {
+    return res.status(400).json({ message: "Adresse e-mail invalide" });
+  }
+
+  // Valider le mot de passe
+  if (!validatePassword(password)) {
+    return res.status(400).json({ message: "Mot de passe invalide" });
+  }
+
+  User.findOne({ email })
     .then((user) => {
       if (user === null) {
-        res
-          .status(401)
-          .json({ message: "Identifiant/mot de passe incorrecte" });
+        res.status(401).json({ message: "Identifiant/mot de passe incorrecte" });
       } else {
         bcrypt
-          .compare(req.body.password, user.password)
+          .compare(password, user.password)
           .then((valid) => {
             if (!valid) {
               res
