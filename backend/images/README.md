@@ -1,0 +1,1 @@
+Ce dossier `images` contient l'image de la sauce piquante.
